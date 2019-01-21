@@ -58,7 +58,7 @@ codeArea.onkeydown = function(e){
           break;
       }
     }
-    highlight([["def","blue"],["print","red"],["(","green"],[")","green"]])
+    highlight([["def","#24c"],["print","#c42"],["(","#2c4"],[")","#2c4"]])
     linesUpdate();
 }
 codeArea.onscroll = function(){
@@ -91,10 +91,7 @@ function startUp(){
 var s,ss;
 function highlight(words){
   setTimeout(function(){
-    
-    lines = codeArea.value.split("\n")
-    syntax.innerText=lines.join("\n")
-    ss = codeArea.value;
+    ss = codeArea.value.replaceAll(" ","-");
     for (var i = 0; i < words.length; i++) {
       s = ss.split(words[i][0]);
       j = "<div class='color' style='color:"+words[i][1]+"'>"+"█".repeat(words[i][0].length)+"</div>"
@@ -103,7 +100,7 @@ function highlight(words){
     }
     console.log(ss)
     syntax.innerHTML = ss.replaceAll("\n","<br>").replaceAll("\t","----");
-  },10);
+  },0);
 }
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
