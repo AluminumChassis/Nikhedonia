@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<body onload="startUp()">
+  <div id="tabs"></div>
+  <div id="syntax"></div>
+  <textarea id="code" cols="40" rows="5"></textarea>
+  <div id="lineCount">1<br></div>
+  <div id="terminal">
+    <input id="terminal-in"></input>
+    <div id="terminal-out"></div>
+  </div>
+</body>
+<script type="text/javascript" src="func.js"></script>
+<style type="text/css">
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #222; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+body, html {
+  margin: 0;
+  padding: 0;
+}
+*{
+  line-height: 1.2;
+  font-size: 14px;
+  color: #ddd;
+  font-family: "Lucida Console", Monaco, monospace;
+  margin: 0;
+  border: none;
+}
+
+#syntax {
+  position: fixed;
+  color: white;
+  height: 94vh;
+  width: 48vw;
+  tab-size: 4;
+  padding-left: 4vw;
+  padding-right: 1vw;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+}
+.color {
+  display: inline;
+}
+#code {
+  position: fixed;
+  tab-size: 4;
+  background-color: black;
+  padding-left: 4vw;
+  padding-right: 1vw;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  height: 94vh;
+  resize: none;
+  overflow-x: scroll;
+  overflow-wrap: unset;
+  width: 48vw;
+  color: white;
+  mix-blend-mode: multiply;
+}
+#terminal {
+  position: fixed;
+  right:0;
+  border-style: inset; 
+  border:none;
+
+  border-left: .5vw #222 solid;
+  width: 47vw;
+  background-color: black;
+  float: left;
+}
+#terminal-in {
+  background-color: #222;
+  padding-left: 1vw;
+  padding-right: 1vw;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  height: 2vh;
+  width: 100%;
+}
+#terminal-out {
+  background-color: black;
+  padding-left: 1vw;
+  padding-right: 1vw;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  height: 90vh;
+  width: 100%;
+}
+#lineCount {
+  background-color: #333;
+  line-height: 1.2;
+  padding-top: 1vh;
+  padding-bottom: .4vh;
+  padding-left: .5vw;
+  position: fixed;
+  border-right: 2px #aaa solid;
+  width: 2.5vw;
+}
+#tabs{
+  height: 4vh;
+  width:100vw;
+}
+</style>
+</html>
