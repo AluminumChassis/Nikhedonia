@@ -15,7 +15,7 @@ if (process.mas) app.setName('CodeStuff')
 
 let mainWindow = null
 
-var inDebug = true;
+var inDebug = false;
 function initialize () {
   makeSingleInstance()
 
@@ -26,6 +26,7 @@ function initialize () {
       width: 1080,
       minWidth: 680,
       height: 840,
+      frame: false,
       title: app.getName()
     }
 

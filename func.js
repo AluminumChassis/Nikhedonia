@@ -1,7 +1,11 @@
 const { dialog } = require('electron').remote
 var fs = require('fs');
 var codeArea = document.getElementById("code");
-var syntax = document.getElementById("syntax")
+var syntax = document.getElementById("syntax");
+var termIn = document.getElementById("terminal-in");
+var termOut = document.getElementById("terminal-out");
+const electron = require('electron').remote
+let w = electron.getCurrentWindow()
 var paths=[]
 var currentFile=0;
 var codeRaw=[]
@@ -58,12 +62,14 @@ codeArea.onkeydown = function(e){
           break;
       }
     }
-    highlight([["def","#24c"],["print","#c42"],["(","#2c4"],[")","#2c4"]])
+    highlight([["def","#24c"],["print(","#c42"],["(","#c42"],[")","#c42"]])
     linesUpdate();
 }
+
 codeArea.onscroll = function(){
-  document.getElementById("lineCount").style.top=(-codeArea.scrollTop)+"px";
-  document.getElementById("syntax").style.top=(-codeArea.scrollTop)+"px";
+  document.getElementById("lineCount").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
+  document.getElementById("syntax").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
+  document.getElementById("syntax").style.left=(-codeArea.scrollLeft)+"px";
 }
 function linesUpdate() {
   setTimeout(function(){
@@ -85,8 +91,28 @@ function linesUpdate() {
     },0)
 }
 
+var resize = document.getElementById("resize");
+function resizeWindow() {
+  current = resize.innerText;
+  resize.innerText=='□'?w.maximize():w.unmaximize();
+  resize.innerText=resize.innerText=='□'?'◱':'□'
+}
+w.on('enter-full-screen', () => {
+  resize.innerText=='◱'
+});
+w.on('maximize', () => {
+  resize.innerText=='◱'
+});
+w.on('leave-full-screen', () => {
+  resize.innerText=='□'
+});
+w.on('unmaximize', () => {
+  resize.innerText=='□'
+});
 function startUp(){
-
+  document.getElementById("lineCount").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
+  document.getElementById("syntax").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
+  document.getElementById("syntax").style.left=(-codeArea.scrollLeft)+"px";
 }
 var s,ss;
 function highlight(words){

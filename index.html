@@ -4,19 +4,27 @@
   <meta charset="utf-8">
 </head>
 <body onload="startUp()">
-  <div id="tabs"></div>
+  <div id="top">
+    <button id="close" class="windowManipulator" onclick="w.close()">✕</button>
+    <button id="resize" class="windowManipulator" onclick="resizeWindow()">□</button>
+    <button id="minimize" class="windowManipulator" onclick="w.minimize()">-</button>
+  </div>
+  <div id="tabs">
+    <div id="tabsRight"></div>
+    <div id="tabsLeft"></div>
+  </div>
   <div id="syntax"></div>
   <textarea id="code" cols="40" rows="5"></textarea>
   <div id="lineCount">1<br></div>
   <div id="terminal">
-    <input id="terminal-in"></input>
     <div id="terminal-out"></div>
+    <input id="terminal-in"></input>
   </div>
 </body>
 <script type="text/javascript" src="func.js"></script>
 <style type="text/css">
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 1vh;
 }
 
 /* Track */
@@ -39,22 +47,23 @@ body, html {
 }
 *{
   line-height: 1.2;
-  font-size: 14px;
+  font-size: 10px;
   color: #ddd;
-  font-family: "Lucida Console", Monaco, monospace;
+  font-family: "Courier New", Courier, monospace;
   margin: 0;
   border: none;
 }
-::selection { background: orange; }
+*::selection { color:black; background: white; }
 #syntax {
+  user-select: none;
   position: fixed;
   color: white;
   height: 94vh;
   width: 48vw;
   tab-size: 4;
-  padding-left: 4vw;
-  padding-right: 1vw;
-  padding-top: 1vh;
+  padding-left: 3vw;
+  padding-top: 1vw;
+  padding-right: 2vw;
   padding-bottom: 1vh;
 }
 .color {
@@ -64,11 +73,12 @@ body, html {
   position: fixed;
   tab-size: 4;
   background-color: black;
-  padding-left: 4vw;
-  padding-right: 1vw;
-  padding-top: 1vh;
+  padding-left: 3vw;
+  padding-top: 1vw;
+  padding-right: 2vw;
   padding-bottom: 1vh;
-  height: 94vh;
+  bottom: 0;
+  height: 92vh;
   resize: none;
   overflow-x: scroll;
   overflow-wrap: unset;
@@ -81,20 +91,20 @@ body, html {
   right:0;
   border-style: inset; 
   border:none;
-
+  overflow-x: scroll;
+  bottom: 0;
   border-left: .5vw #222 solid;
   width: 47vw;
   background-color: black;
   float: left;
 }
 #terminal-in {
-  background-color: #222;
+  background-color: #666;
   padding-left: 1vw;
   padding-right: 1vw;
-  padding-top: 1vh;
-  padding-bottom: 1vh;
-  height: 2vh;
-  width: 100%;
+  padding-top: .5vh;
+  padding-bottom: .5vh;
+  width: 95%;
 }
 #terminal-out {
   background-color: black;
@@ -102,8 +112,9 @@ body, html {
   padding-right: 1vw;
   padding-top: 1vh;
   padding-bottom: 1vh;
-  height: 90vh;
-  width: 100%;
+  overflow-y: scroll;
+  height: 88vh;
+  width: 95%;
 }
 #lineCount {
   background-color: #333;
@@ -112,12 +123,52 @@ body, html {
   padding-bottom: .4vh;
   padding-left: .5vw;
   position: fixed;
-  border-right: 2px #aaa solid;
-  width: 2.5vw;
+  border-right: 2px #333 solid;
+  width: 20px;
 }
 #tabs{
-  height: 4vh;
+  z-index: 100;
+  background-color: #444;
+  height: 3vh;
   width:100vw;
+  position: fixed;
+  top:3vh;
+}
+#tabsRight{
+  display: block;
+  float: left;
+  height: 100%;
+  width:52.5%;
+}
+#tabsLeft{
+  float: left;
+  border-left: .5vw #222 solid;
+  display: block;
+  height: 100%;
+  width:47%; 
+}
+#top{
+ -webkit-app-region: drag;
+  z-index: 100;
+  background-color: #222;
+  height: 3vh;
+  width:100vw;
+  position: fixed;
+  top:0;
+}
+.windowManipulator{
+ -webkit-app-region: no-drag;
+  padding:0;
+  background-color: #000;
+  float: right;
+  position: relative;
+  height: 100%;
+  width: 2vw;
+  padding-top: .5vh;
+  font-size: 2vh;
+}
+.windowManipulator:hover{
+  background-color: #333; 
 }
 </style>
 </html>
