@@ -15,7 +15,7 @@ if (process.mas) app.setName('CodeStuff')
 
 let mainWindow = null
 
-var inDebug = false;
+var inDebug = true;
 function initialize () {
   makeSingleInstance()
 
@@ -27,19 +27,25 @@ function initialize () {
       minWidth: 680,
       height: 840,
       frame: false,
-      title: app.getName()
+      title: app.getName(),
+      show:false,
     }
 
     if (process.platform === 'linux') {
-      windowOptions.icon = path.join(__dirname, '/assets/app-icon/png/512.png')
+      windowOptions.icon = path.join(__dirname, '/buildResources/icon.png')
     }
 
     mainWindow = new BrowserWindow(windowOptions)
-    mainWindow.loadURL(path.join('file://', __dirname, '/index.html'))
+
+    mainWindow.loadURL(path.join('file://', __dirname, '/src/index.html'))
+
     if(!inDebug){
       mainWindow.webContents.on("devtools-opened", () => { mainWindow.webContents.closeDevTools(); });
       mainWindow.setMenu(null);
     }
+    mainWindow.once('ready-to-show', () => {
+      mainWindow.show()
+    })
     mainWindow.on('closed', () => {
       mainWindow = null
     })

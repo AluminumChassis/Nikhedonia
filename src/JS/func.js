@@ -5,6 +5,9 @@ var syntax = document.getElementById("syntax");
 var termIn = document.getElementById("terminal-in");
 var termOut = document.getElementById("terminal-out");
 const electron = require('electron').remote
+const path = require('path')
+const shelljs = require('shelljs')
+shelljs.config.execPath = path.join('C:', 'Program Files', 'nodejs', 'node.exe')
 let w = electron.getCurrentWindow()
 var paths=[]
 var currentFile=0;
@@ -65,11 +68,14 @@ codeArea.onkeydown = function(e){
     highlight([["def","#24c"],["print(","#c42"],["(","#c42"],[")","#c42"]])
     linesUpdate();
 }
-
 codeArea.onscroll = function(){
-  document.getElementById("lineCount").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
-  document.getElementById("syntax").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
-  document.getElementById("syntax").style.left=(-codeArea.scrollLeft)+"px";
+  scroll()
+}
+termIn.onkeydown=function(e){
+  if(e.keyCode==13) {
+    termOut.innerHTML+="<div class='command'>&#62;"+termIn.value+"<br>"+shelljs.exec(termIn.value, {silent:true}).stdout +"</div>";
+    termOut.scrollTop = termOut.scrollHeight;
+  }
 }
 function linesUpdate() {
   setTimeout(function(){
@@ -95,21 +101,30 @@ var resize = document.getElementById("resize");
 function resizeWindow() {
   current = resize.innerText;
   resize.innerText=='□'?w.maximize():w.unmaximize();
-  resize.innerText=resize.innerText=='□'?'◱':'□'
+  resize.innerText=resize.innerText=='□'?'◱':'□';
+  scroll()
 }
 w.on('enter-full-screen', () => {
-  resize.innerText=='◱'
+  resize.innerText='◱'
+  scroll()
 });
 w.on('maximize', () => {
-  resize.innerText=='◱'
+  resize.innerText='◱'
+  scroll()
 });
 w.on('leave-full-screen', () => {
-  resize.innerText=='□'
+  resize.innerText='□'
+  scroll()
 });
 w.on('unmaximize', () => {
-  resize.innerText=='□'
+  resize.innerText='□'
+  scroll()
 });
 function startUp(){
+  scroll()
+  w.maximize();
+}
+function scroll(){
   document.getElementById("lineCount").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
   document.getElementById("syntax").style.top=(2*document.getElementById("tabs").clientHeight-codeArea.scrollTop)+"px";
   document.getElementById("syntax").style.left=(-codeArea.scrollLeft)+"px";
@@ -117,7 +132,7 @@ function startUp(){
 var s,ss;
 function highlight(words){
   setTimeout(function(){
-    ss = codeArea.value.replaceAll(" ","-");
+    ss = codeArea.value.replaceAll(" ","-").replaceAll("<","&#60;");
     for (var i = 0; i < words.length; i++) {
       s = ss.split(words[i][0]);
       j = "<div class='color' style='color:"+words[i][1]+"'>"+"█".repeat(words[i][0].length)+"</div>"

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<body onload="startUp()">
+  <div id="top">
+    <div id="title">NIKHEDONIA</div>
+    <button id="close" class="windowManipulator" onclick="w.close()">✕</button>
+    <button id="resize" class="windowManipulator" onclick="resizeWindow()">□</button>
+    <button id="minimize" class="windowManipulator" onclick="w.minimize()">−</button>
+  </div>
+  <div id="tabs">
+    <div id="tabsRight"></div>
+    <div id="tabsLeft"></div>
+  </div>
+  <div id="syntax"></div>
+  <textarea id="code" cols="40" rows="5"></textarea>
+  <div id="lineCount">1<br></div>
+  <div id="terminal">
+    <div id="terminal-out"></div>
+    <input id="terminal-in"></input>
+  </div>
+</body>
+<script type="text/javascript" src="JS/func.js"></script>
+<link rel="stylesheet" type="text/css" href="CSS/main.css">
+</html>
