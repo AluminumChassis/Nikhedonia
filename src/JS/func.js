@@ -1,14 +1,20 @@
 const { dialog } = require('electron').remote
-var fs = require('fs');
-var codeArea = document.getElementById("code");
-var syntax = document.getElementById("syntax");
-var termIn = document.getElementById("terminal-in");
-var termOut = document.getElementById("terminal-out");
 const electron = require('electron').remote
+
+const fs = require('fs');
+const { PythonShell } = require('python-shell');
 const path = require('path')
 const shelljs = require('shelljs')
 shelljs.config.execPath = path.join('C:', 'Program Files', 'nodejs', 'node.exe')
 let w = electron.getCurrentWindow()
+
+
+var codeArea = document.getElementById("code");
+var syntax = document.getElementById("syntax");
+var termIn = document.getElementById("terminal-in");
+var termOut = document.getElementById("terminal-out");
+
+var defaultHighlighting = [["def","#3573A5"],["elif","#57C478"],["if","#57C478"],["print(","#f3d250"],["(","#f3d250"],[")","#f3d250"],["import","#90ccf4"],["+","#c96567"],["-","#c96567"],["*","#c96567"],["&lt;","#c96567"],["&gt;","#c96567"],["&#61;","#c96567"]]
 var paths=[]
 var currentFile=0;
 var codeRaw=[]
@@ -44,6 +50,7 @@ codeArea.onkeydown = function(e){
             codeRaw[currentFile]=ret;
             codeArea.value=ret;
             linesUpdate();
+            highlight();
           }); 
           break;
         case 9:
@@ -65,17 +72,52 @@ codeArea.onkeydown = function(e){
           break;
       }
     }
-    highlight([["def","#24c"],["print(","#c42"],["(","#c42"],[")","#c42"]])
+    highlight()
     linesUpdate();
 }
 codeArea.onscroll = function(){
   scroll()
 }
+var running = "";
+var pyshell;
 termIn.onkeydown=function(e){
-  if(e.keyCode==13) {
-    termOut.innerHTML+="<div class='command'>&#62;"+termIn.value+"<br>"+shelljs.exec(termIn.value, {silent:true}).stdout +"</div>";
-    termOut.scrollTop = termOut.scrollHeight;
+  switch(e.keyCode) {
+    case 13:
+      if(running) {
+        pyshell.send(termIn);
+
+      } else {
+        if(termIn.value.substring(0,3).toLowerCase()=="py ") {
+          pyshell = new PythonShell(termIn.value.substring(3),null, function (err) {
+            if (err) {
+              terminalMessage("Python error:"+err)
+            };
+            running="";
+          });
+          running=termIn.value.substring(3);
+          pyshell.on('message', function (message) {
+            terminalMessage(running, message);
+          });
+          pyshell.on('close', function () {
+            terminalMessage("Python status","Exited");
+            running="";
+          });
+        } else {
+          terminalMessage(termIn.value,shelljs.exec(termIn.value, {silent:true}).stdout)
+        }
+      }
+      break;
+    case 9:
+      e.preventDefault();
+      if(paths[currentFile]) {
+        termIn.value+=paths[currentFile]
+      }
   }
+}
+function terminalMessage(header, message) {
+  if (!message) {message="[No result]"}
+  termOut.innerHTML+="<div class='command'>&#62;"+header+"<br>"+message +"</div>";
+  termOut.scrollTop = termOut.scrollHeight;
 }
 function linesUpdate() {
   setTimeout(function(){
@@ -130,18 +172,29 @@ function scroll(){
   document.getElementById("syntax").style.left=(-codeArea.scrollLeft)+"px";
 }
 var s,ss;
-function highlight(words){
+function highlight(){
+  words = defaultHighlighting;
   setTimeout(function(){
-    ss = codeArea.value.replaceAll(" ","-").replaceAll("<","&#60;");
+    ss = codeArea.value.replaceAll(" ","█").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("=","&#61;");
+
     for (var i = 0; i < words.length; i++) {
       s = ss.split(words[i][0]);
-      j = "<div class='color' style='color:"+words[i][1]+"'>"+"█".repeat(words[i][0].length)+"</div>"
+      j = "<div class='color' style='color:"+words[i][1]+"'>"+"█".repeat(match(words[i][0]).length)+"</div>"
       s=s.join(j)
       ss=s;
     }
+
     console.log(ss)
+
     syntax.innerHTML = ss.replaceAll("\n","<br>").replaceAll("\t","----");
   },0);
+}
+function match(word) {
+  if(word=="&#61;"||word=="&lt;"||word=="&gt;"){
+      return "."
+  } else {
+      return word;
+  }
 }
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;

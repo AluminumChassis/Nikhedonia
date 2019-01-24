@@ -1,11 +1,11 @@
 ::-webkit-scrollbar {
   height: .5vh;
-  width: 1vw;
+  width: .5vw;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #888; 
+  background: #353535; 
 }
  
 /* Handle */
@@ -18,10 +18,12 @@
   background: #ff0; 
 }
 body, html {
+  background-color: black;
   margin: 0;
   padding: 0;
 }
 *{
+  border-radius: .25vw;
   outline: none;
   line-height: 1.2;
   font-size: 12px;
@@ -77,7 +79,7 @@ body, html {
   float: left;
 }
 #terminal-in {
-  background-color: #666;
+  background-color: #383838;
   padding-left: 1vw;
   padding-right: 1vw;
   padding-top: .5vh;
@@ -109,10 +111,11 @@ body, html {
   width: 45vw;
 }
 #lineCount {
-
+  user-select: none;
   background-color: #333;
   line-height: 1.2;
-  padding-top: 1vh;
+  margin-top: .5vh; 
+  padding-top: .5vh;
   padding-bottom: .4vh;
   padding-left: .5vw;
   position: fixed;
@@ -131,18 +134,17 @@ body, html {
   display: block;
   float: left;
   height: 100%;
-  overflow-x: scroll;
+  overflow-x: hidden;
   width: 48vw;
   padding-left: 3vw;
   padding-right: 2vw;
 }
 #tabsLeft{
   float: left;
-  overflow-x: scroll;
-  border-left: .5vw orange solid;
+  overflow-x: hidden;
   display: block;
   height: 100%;
-  width: 46.5%; 
+  width: 47%; 
 }
 #top{
  -webkit-app-region: drag;
