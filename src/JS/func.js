@@ -2,12 +2,13 @@ const { dialog } = require('electron').remote
 const electron = require('electron').remote
 
 const fs = require('fs');
-const { PythonShell } = require('python-shell');
 const path = require('path')
+/*
 const shelljs = require('shelljs')
 shelljs.config.execPath = path.join('C:', 'Program Files', 'nodejs', 'node.exe')
+*/
+const { spawn } = require('child_process');
 let w = electron.getCurrentWindow()
-
 
 var codeArea = document.getElementById("code");
 var syntax = document.getElementById("syntax");
@@ -34,7 +35,7 @@ codeArea.onkeydown = function(e){
               return;
             }
             console.log("File saved.");
-          }); 
+          });
           break;
         case 79:
           e.preventDefault();
@@ -80,31 +81,29 @@ codeArea.onscroll = function(){
 }
 var running = "";
 var pyshell;
+var child; 
 termIn.onkeydown=function(e){
   switch(e.keyCode) {
     case 13:
       if(running) {
-        pyshell.send(termIn);
-
+        child.stdin.write(termIn.value + "\n");
+        
+        //child.stdin.end();
       } else {
-        if(termIn.value.substring(0,3).toLowerCase()=="py ") {
-          pyshell = new PythonShell(termIn.value.substring(3),null, function (err) {
-            if (err) {
-              terminalMessage("Python error:"+err)
-            };
-            running="";
-          });
-          running=termIn.value.substring(3);
-          pyshell.on('message', function (message) {
-            terminalMessage(running, message);
-          });
-          pyshell.on('close', function () {
-            terminalMessage("Python status","Exited");
-            running="";
-          });
-        } else {
-          terminalMessage(termIn.value,shelljs.exec(termIn.value, {silent:true}).stdout)
-        }
+        running=termIn.value.substring(termIn.value.indexOf(" ")+1)
+        child = spawn(termIn.value.substring(0,termIn.value.indexOf(" ")),[running]).on('error', function( err ){ console.log(err) });
+        
+        child.stdout.on('data', (chunk) => {
+          terminalMessage("Python out",chunk)
+        });
+        child.stderr.on('data', (data) => {
+          terminalMessage("Python error:",data)
+        });
+        child.on('close', (code) => {
+          terminalMessage("Python exited with code: ", code)
+          running=""
+        });
+      
       }
       break;
     case 9:
@@ -134,7 +133,6 @@ function linesUpdate() {
     if (lines==1) {
       document.getElementById("lineCount").innerHTML="1<br>";
     }
-    console.log(lines)
     currentLines = lines;
     },0)
 }
@@ -183,9 +181,6 @@ function highlight(){
       s=s.join(j)
       ss=s;
     }
-
-    console.log(ss)
-
     syntax.innerHTML = ss.replaceAll("\n","<br>").replaceAll("\t","----");
   },0);
 }
