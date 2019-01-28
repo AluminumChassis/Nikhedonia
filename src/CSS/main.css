@@ -63,7 +63,7 @@ body, html {
   bottom: 0;
   height: 92vh;
   resize: none;
-  overflow-x: scroll;
+  white-space: nowrap;
   width: 48vw;
   color: white;
   mix-blend-mode: multiply;
@@ -150,9 +150,11 @@ body, html {
   background-color: #1a1a1a;
   width: 15%;
   padding: .7vh;
+  padding-bottom: 2vh;
   text-align: center;
   overflow-x: hidden;
   display: block;
+  cursor: pointer;
   float: left;
 }
 #top{

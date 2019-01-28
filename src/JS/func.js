@@ -15,12 +15,15 @@ var syntax = document.getElementById("syntax");
 var termIn = document.getElementById("terminal-in");
 var termOut = document.getElementById("terminal-out");
 
-var defaultHighlighting = [["def","#3573A5"],["elif","#57C478"],["if","#57C478"],["print(","#f3d250"],["(","#f3d250"],[")","#f3d250"],["import","#90ccf4"],["+","#c96567"],["-","#c96567"],["*","#c96567"],["&lt;","#c96567"],["&gt;","#c96567"],["&#61;","#c96567"]]
+var defaultHighlighting = [["def","#3573A5"],["return","#f2f223"],["for","#a93b2c"],["&#58;","#3bca31"],[".","#12d5fe"],["elif","#57C478"],["if","#57C478"],["print(","#f352f0"],["(","#f352f0"],[")","#f352f0"],["import","#90ccf4"],["+","#c96567"],["-","#c96567"],["*","#c96567"],["&lt;","#c96567"],["&gt;","#c96567"],["&#61;","#c96567"]]
 var paths=[]
 var currentFile=0;
 var codeRaw=[]
+var saved=[]
 var currentLines=1;
 var numTabsLeft=0;
+var previousCommands = []
+var currentCommand = 0;
 codeArea.onkeydown = function(e){
     codeRaw[currentFile]=codeArea.value;
     if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
@@ -35,6 +38,10 @@ codeArea.onkeydown = function(e){
               alert(err);
               return;
             }
+
+            saved[currentFile]=true;
+
+            tabsUpdate();
             console.log("File saved.");
           });
           break;
@@ -68,6 +75,10 @@ codeArea.onkeydown = function(e){
           break;
       }
     } else {
+      if((91>e.keyCode&&e.keyCode>64)||e.keyCode==9||e.keyCode==46||e.keyCode==46) {
+        saved[currentFile]=false;
+        tabsUpdate();
+      }
       switch (e.keyCode){
         case 9:
           e.preventDefault();
@@ -99,58 +110,96 @@ termIn.onkeydown=function(e){
           
           //child.stdin.end();
         } else {
-          prefix = termIn.value.substring(0,termIn.value.indexOf(" "))
-          switch(prefix){
-            case "py":
-              running=termIn.value.substring(3)
-              child = spawn(prefix,[running]).on('error', function( err ){ console.log(err) });
-              
-              child.stdout.on('data', (chunk) => {
-                terminalMessage("Python out",chunk)
-              });
-              child.stderr.on('data', (data) => {
-                terminalMessage("Python error:",data)
-              });
-              child.on('close', (code) => {
-                terminalMessage("Python exited with code: ", code)
-                running=""
-              });
-              break
-            case "os":
-              command = termIn.value.substring(3)
-              if(command.indexOf(" ")>0){
-                prefix = command.substring(0,command.indexOf(" "))
-                args = command.substring(command.indexOf(" "))
-              } else {
-                prefix = command;
-                args = ""
-              }
-              console.log([command,prefix,args])
-              child = spawn(prefix,args.split(" ")).on('error', function( err ){ terminalMessage(command,"Error: Unable to use command "+command) });
-              
-              child.stdout.on('data', (chunk) => {
-                terminalMessage(command,chunk)
-              });
-              child.stderr.on('data', (data) => {
-              
-              });
-              child.on('close', (code) => {
-              
-              });
-              break
-            default:
+          if(termIn.value.indexOf(" ")>0){
+            prefix = termIn.value.substring(0,termIn.value.indexOf(" "))
+            switch(prefix){
+              case "py":
+                running=termIn.value.substring(3)
+                child = spawn(prefix,[running]).on('error', function( err ){ console.log(err) });
+                
+                child.stdout.on('data', (chunk) => {
+                  terminalMessage("Python out",chunk)
+                });
+                child.stderr.on('data', (data) => {
+                  terminalMessage("Python error:",data)
+                });
+                child.on('close', (code) => {
+                  terminalMessage("Python exited with code: ", code)
+                  running=""
+                });
+                break
+              case "os":
+                command = termIn.value.substring(3)
+                if(command.indexOf(" ")>0){
+                  prefix = command.substring(0,command.indexOf(" "))
+                  args = command.substring(command.indexOf(" "))
+                } else {
+                  prefix = command;
+                  args = ""
+                }
+                console.log([command,prefix,args])
+                child = spawn(prefix,args.split(" ")).on('error', function( err ){ terminalMessage(command,"Error: Unable to use command "+command) });
+                
+                child.stdout.on('data', (chunk) => {
+                  terminalMessage(command,chunk)
+                });
+                child.stderr.on('data', (data) => {
+                
+                });
+                child.on('close', (code) => {
+                
+                });
+                break
+              case "size":
 
-              break
+                command = termIn.value.substring(termIn.value.indexOf(" "))
+                args = command.substring(command.indexOf(" ")).split(" ")
+                stats = fs.statSync(args[1])
+                bytes = stats.size
+                terminalMessage("size in bytes of: "+args[1], bytes)
+                break;
+              default:
+
+                break
+            }
+          } else {
+            switch (termIn.value) {
+              case "clear":
+                termOut.innerHTML=""
+                break;
+              default:
+                terminalMessage("Command unknown", termIn.value)
+                break;
+            }
           }
-          
-        
         }
+        if(previousCommands[0]!=termIn.value){
+          previousCommands.splice(0,0,termIn.value)
+        }
+        currentCommand=-1;
+        termIn.value=""
         break;
       case 9:
         e.preventDefault();
+        currentCommand=-1
         if(paths[currentFile]) {
-          termIn.value+=paths[currentFile]
+          termIn.value=termIn.value.splice(termIn.selectionStart,0,paths[currentFile])
         }
+        break;
+      case 38:
+        currentCommand++
+        if(previousCommands.length>0){
+          if(currentCommand>previousCommands.length-1) {currentCommand=previousCommands.length-1}
+          termIn.value=previousCommands[currentCommand]
+        }
+        break;
+      case 40:
+        currentCommand--
+        if(currentCommand<0) {currentCommand=0}
+        termIn.value=previousCommands[currentCommand]
+        break;
+      default:
+        break;
     }
   }
 }
@@ -214,7 +263,7 @@ var s,ss;
 function highlight(){
   words = defaultHighlighting;
   setTimeout(function(){
-    ss = codeArea.value.replaceAll(" ","█").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("=","&#61;");
+    ss = codeArea.value.replaceAll(" ","█").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("=","&#61;").replaceAll(":","&#58;");
 
     for (var i = 0; i < words.length; i++) {
       s = ss.split(words[i][0]);
@@ -226,7 +275,7 @@ function highlight(){
   },0);
 }
 function match(word) {
-  if(word=="&#61;"||word=="&lt;"||word=="&gt;"){
+  if(word=="&#61;"||word=="&lt;"||word=="&gt;"||word=="&#58;"){
       return "."
   } else {
       return word;
@@ -243,17 +292,34 @@ function switchTab(){
       currentFile=parseInt(this.id.substring(3))
       switchTab()
     }
+    saved.push(true)
     document.getElementById("tabsLeft").appendChild(t)
   }
   for(var i = 0; i<document.getElementById("tabsLeft").children.length;i++){
-    document.getElementById("tabsLeft").children[i].style="background-color:#1a1a1a"
+    document.getElementById("tabsLeft").children[i].style="background-color:#2a2a2a"
   }
   document.getElementById("tab"+currentFile).style="background-color:#111"
   codeArea.value=codeRaw[currentFile];
   linesUpdate();
   highlight();
 }
+function tabsUpdate(){
+  for(var i = 0; i<document.getElementById("tabsLeft").children.length;i++){
+    if(saved[i]){
+      document.getElementById("tabsLeft").children[i].innerText=document.getElementById("tabsLeft").children[i].innerText.replace("*","")
+    } else {
+      if(!document.getElementById("tabsLeft").children[i].innerText.includes("*")){
+        document.getElementById("tabsLeft").children[i].innerText+="*"
+      }
+    }
+  }
+}
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
     return target.replace(new RegExp(search, 'g'), replacement);
 };
+if (!String.prototype.splice) {
+    String.prototype.splice = function(start, delCount, newSubStr) {
+        return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount));
+    };
+}
