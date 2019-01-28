@@ -20,6 +20,7 @@ var paths=[]
 var currentFile=0;
 var codeRaw=[]
 var currentLines=1;
+var numTabsLeft=0;
 codeArea.onkeydown = function(e){
     codeRaw[currentFile]=codeArea.value;
     if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
@@ -40,7 +41,10 @@ codeArea.onkeydown = function(e){
         case 79:
           e.preventDefault();
           fileNames = dialog.showOpenDialog({title:"file"})
-          
+          if(!paths.includes(fileNames[0])){
+            currentFile=paths.length
+            numTabsLeft++;
+          }
           paths[currentFile] = fileNames[0]
 
           fs.readFile(paths[currentFile], function(err,ret) {
@@ -49,14 +53,16 @@ codeArea.onkeydown = function(e){
               return;
             }
             codeRaw[currentFile]=ret;
-            codeArea.value=ret;
-            linesUpdate();
-            highlight();
+            switchTab();
           }); 
           break;
         case 9:
           e.preventDefault();
           currentFile++;
+          if(paths.length<=currentFile){
+            currentFile=0;
+          }
+          switchTab();
           break;
         default:
           break;
@@ -83,34 +89,69 @@ var running = "";
 var pyshell;
 var child; 
 termIn.onkeydown=function(e){
-  switch(e.keyCode) {
-    case 13:
-      if(running) {
-        child.stdin.write(termIn.value + "\n");
+  if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
+    
+  } else {
+    switch(e.keyCode) {
+      case 13:
+        if(running) {
+          child.stdin.write(termIn.value + "\n");
+          
+          //child.stdin.end();
+        } else {
+          prefix = termIn.value.substring(0,termIn.value.indexOf(" "))
+          switch(prefix){
+            case "py":
+              running=termIn.value.substring(3)
+              child = spawn(prefix,[running]).on('error', function( err ){ console.log(err) });
+              
+              child.stdout.on('data', (chunk) => {
+                terminalMessage("Python out",chunk)
+              });
+              child.stderr.on('data', (data) => {
+                terminalMessage("Python error:",data)
+              });
+              child.on('close', (code) => {
+                terminalMessage("Python exited with code: ", code)
+                running=""
+              });
+              break
+            case "os":
+              command = termIn.value.substring(3)
+              if(command.indexOf(" ")>0){
+                prefix = command.substring(0,command.indexOf(" "))
+                args = command.substring(command.indexOf(" "))
+              } else {
+                prefix = command;
+                args = ""
+              }
+              console.log([command,prefix,args])
+              child = spawn(prefix,args.split(" ")).on('error', function( err ){ terminalMessage(command,"Error: Unable to use command "+command) });
+              
+              child.stdout.on('data', (chunk) => {
+                terminalMessage(command,chunk)
+              });
+              child.stderr.on('data', (data) => {
+              
+              });
+              child.on('close', (code) => {
+              
+              });
+              break
+            default:
+
+              break
+          }
+          
         
-        //child.stdin.end();
-      } else {
-        running=termIn.value.substring(termIn.value.indexOf(" ")+1)
-        child = spawn(termIn.value.substring(0,termIn.value.indexOf(" ")),[running]).on('error', function( err ){ console.log(err) });
-        
-        child.stdout.on('data', (chunk) => {
-          terminalMessage("Python out",chunk)
-        });
-        child.stderr.on('data', (data) => {
-          terminalMessage("Python error:",data)
-        });
-        child.on('close', (code) => {
-          terminalMessage("Python exited with code: ", code)
-          running=""
-        });
-      
-      }
-      break;
-    case 9:
-      e.preventDefault();
-      if(paths[currentFile]) {
-        termIn.value+=paths[currentFile]
-      }
+        }
+        break;
+      case 9:
+        e.preventDefault();
+        if(paths[currentFile]) {
+          termIn.value+=paths[currentFile]
+        }
+    }
   }
 }
 function terminalMessage(header, message) {
@@ -190,6 +231,27 @@ function match(word) {
   } else {
       return word;
   }
+}
+function switchTab(){
+  if(numTabsLeft>document.getElementById("tabsLeft").childElementCount){
+    t = document.createElement("div"); 
+    t.className="tab"
+    t.id="tab"+(numTabsLeft-1)
+    t.innerText=paths[paths.length-1].split("\\")[paths[paths.length-1].split("\\").length-1]
+    t.onclick=function(){
+      console.log("clicked")
+      currentFile=parseInt(this.id.substring(3))
+      switchTab()
+    }
+    document.getElementById("tabsLeft").appendChild(t)
+  }
+  for(var i = 0; i<document.getElementById("tabsLeft").children.length;i++){
+    document.getElementById("tabsLeft").children[i].style="background-color:#1a1a1a"
+  }
+  document.getElementById("tab"+currentFile).style="background-color:#111"
+  codeArea.value=codeRaw[currentFile];
+  linesUpdate();
+  highlight();
 }
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;

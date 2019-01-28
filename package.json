@@ -5,6 +5,12 @@
   "description": "A code editor and terminal",
   "main": "main.js",
   "bin": "cli.js",
+  "build": {
+    "appId": "com.bengalaxy.NIKHEDONIA",
+    "directories":{
+      "buildResources":"buildResources"
+    }
+  },
   "scripts": {
     "start": "electron .",
     "dev": "electron . --debug",

@@ -26,7 +26,7 @@ body, html {
   border-radius: .25vw;
   outline: none;
   line-height: 1.2;
-  font-size: 12px;
+  font-size: 1.5vh;
   color: #ddd;
   font-family: Consolas, monaco, monospace;
   margin: 0;
@@ -135,16 +135,25 @@ body, html {
   float: left;
   height: 100%;
   overflow-x: hidden;
-  width: 48vw;
-  padding-left: 3vw;
-  padding-right: 2vw;
+  overflow-y: hidden;
+  width: 47%;
 }
 #tabsLeft{
   float: left;
   overflow-x: hidden;
+  overflow-y: hidden;
   display: block;
   height: 100%;
-  width: 47%; 
+  width: 53%; 
+}
+.tab{
+  background-color: #1a1a1a;
+  width: 15%;
+  padding: .7vh;
+  text-align: center;
+  overflow-x: hidden;
+  display: block;
+  float: left;
 }
 #top{
  -webkit-app-region: drag;
